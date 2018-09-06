@@ -1,6 +1,6 @@
 package AG;
 
-public class MLP {
+public class MLP2 {
 	private double[][] pesos;
 	private double[] bias;
 	private double[] pesosE;
@@ -19,7 +19,7 @@ public class MLP {
 	private double max = 0;
 	private double min = 0;
 
-	public MLP(double[][] input, double[] output, int qNE, int tamanhoDaJanela, double max, double min) {
+	public MLP2(double[][] input, double[] output, int qNE, int tamanhoDaJanela, double max, double min) {
 		this.input = input;
 		this.outputD = output;
 		nets = new double[qNE];
@@ -206,50 +206,6 @@ public class MLP {
 
 	}
 
-	public double[] prevision(double[] input,int n) {
-		eqm = 0;
-		double[] prevision = new double[n];
-		// cada instancia (entrada)
-		for (int y = 0; y < n; y++) {
-			// resetando a saida
-			netsO = 0;
-			fnetsO = 0;
-			// resert NET(s)
-			for (int i = 0; i < nets.length; i++) {
-				nets[i] = 0;
-				fnets[i] = 0;
-			}
-
-			for (int i = 0; i < nets.length; i++) {
-
-				for (int j = 0; j < pesos[0].length; j++) {
-					nets[i] += pesos[i][j] * input[j];
-				}
-				nets[i] += bias[i];
-				fnets[i] = f(nets[i]);
-
-			}
-			// alimentando a(s) saida(s)
-			for (int j = 0; j < nets.length; j++) {
-				netsO += fnets[j] * pesosE[j];
-			}
-			netsO += biasE;
-			fnetsO = netsO;
-
-			prevision[y] = desnormalizar(fnetsO, min, max);
-			// EQ
-			eqm += Math.pow((outputD[y] - prevision[y]), 2);
-			for (int i = 0; i < input.length-1; i++) {
-				input[i] = input[i+1];
-			}
-			input[input.length-1] = prevision[y];
-
-		} // final da interacoes das instancias
-
-		eqm = eqm / outputD.length;
-		return prevision;
-	}
-	
 	private static double f(double d) {
 
 		return 1.0 / (1 + Math.exp(-d));

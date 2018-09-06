@@ -88,5 +88,24 @@ public class Grafico extends JFrame {
 		frame.pack();
 		frame.setVisible(true);
 	}
+	public static void mostrar3(double[] vector,String nome) {
 
+		DefaultCategoryDataset d = new DefaultCategoryDataset();
+		
+		int k;
+		for (k = 0; k < vector.length; k++) {
+			d.addValue(vector[k], nome, k + "");
+		}
+
+		JFreeChart grafico = ChartFactory.createLineChart("", "geracao", "fitness", d, PlotOrientation.VERTICAL, true,
+				true, true);
+		grafico.getCategoryPlot().getRenderer().setSeriesPaint(0, Color.RED);
+
+		JFrame frame = new JFrame();
+		frame.add(new ChartPanel(grafico));
+
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
+	}
 }

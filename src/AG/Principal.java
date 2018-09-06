@@ -17,11 +17,14 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import AG.AlgoritmoGeneticoReal;
+import AG.MLP;
 import grafico.Grafico;
 
-public class Organizando {
+public class Principal {
 	static Random rand = new Random();
-
+	static int v = 0;
+	static int f = 0;
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
 		int i = 0;
 		i = (int) (tamanhoDosDados * por);
@@ -74,30 +77,32 @@ public class Organizando {
 		return valuesN;
 	}
 	
-	public static void main(String[] args) {
+	public static double  run(int r,int r2,double ant){
 		System.out.println("Aguarde");
-		int tamanhoDaJanela = 12;
+		int tamanhoDaJanela = 1;
 
 		// qNE é o numero de neuronios da Camada de Escondida
-		int qNE = 10;
+		int qNE = 5;
 
 		// qNS é o numero de neuronios da Camada de Saida
 		int qNS = 1;
 		
-		String nomeDaBase = "leite.txt";
-		List<Double> dados = leituraDeArquivo(nomeDaBase);
-		
+		String nomeDaBase = "jpy.txt";
+		List<Double> dados = leituraDeArquivo(nomeDaBase,r);	
+		List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
 		
 		// tamaho Do Conjunto de Treino
 		int treinoLegth = porcentagemDoDados(dadosTamanho, 0.5);
+		
+		// tamaho Do Conjunto de validacao
+		int validaLegth = porcentagemDoDados(dadosTamanho, 0.3);
 
 		// tamaho Do Conjunto de validacao
-		int validaLegth = porcentagemDoDados(dadosTamanho, 0.2);
-
-		// tamaho Do Conjunto de validacao
-		int testeLegth = porcentagemDoDados(dadosTamanho, 0.3);
-
+		int testeLegth = porcentagemDoDados(dadosTamanho, 0.2);
+		if(r %2 !=0){
+			testeLegth--;
+		}
 		//extremos
 		double min = dados.get(0);
 		double max = dados.get(0);
@@ -135,6 +140,10 @@ public class Organizando {
 			}
 			saidaT[i] = dados.get(entradaT[0].length + i + entrada.length + entradaV.length);
 		}
+		double real[] = new double[r2];
+		for (int i = 0; i < real.length; i++) {
+			real[i] = dados2.get(i);
+		}
 		
 		// Normaliza
 		double entradaN[][] = normalizaValues(entrada, min, max);
@@ -148,9 +157,11 @@ public class Organizando {
 		double treino[] = new double[saida.length];
 		double validacao[] = new double[saidaV.length];
 		double teste[] = new double[saidaT.length];
+		double prevision[] = new double[real.length];
+		
 		
 		//otimizador
-		int numeroDeGeracao = 1000;
+		int numeroDeGeracao =2000;
 		int x = (tamanhoDaJanela * qNE + qNE) + (qNE * qNS) + qNS;
 		double errosMediosQuadraticos[];
 		double melhorIndFit[] = new double[numeroDeGeracao];
@@ -162,9 +173,12 @@ public class Organizando {
 		double[][] populacaoEletismo;
 		double[] fitness = null;
 		double[] melhorIndividuo = null;
-		double[][] populacao = ag.gerandoPopulacao(50, x, -1, 1);
+		double[][] populacao = ag.gerandoPopulacao(10, x, -1, 1);
 		MLP mlp = new MLP(entradaN, saida, qNE,tamanhoDaJanela,min, max);
-
+		MLP mlpV = new MLP(entradaVN, saidaV, qNE, tamanhoDaJanela,min, max);
+		double[] rsmeVectorValida = new double[numeroDeGeracao];
+		double pesos2[] = null;
+		double rsmeValidaMenor = 9999999;
 		for (int cont = 0; cont < numeroDeGeracao; cont++) {
 
 			if (cont > 0) {
@@ -186,13 +200,27 @@ public class Organizando {
 			fitness = ag.fitness(errosMediosQuadraticos);
 			melhorIndividuo = ag.melhorIndividuo(populacao, fitness);
 			melhorIndFit[cont] = ag.melhorIndividuoFit(fitness);
-
-		} //otimizador fim
+			
+			mlpV.setAllPesos(melhorIndividuo);
+			mlpV.interation();
+			rsmeVectorValida[cont] = mlpV.getEqm();
+			if (rsmeVectorValida[cont]<rsmeValidaMenor) {
+				rsmeValidaMenor = rsmeVectorValida[cont];
+				pesos2 = melhorIndividuo;
+			}/*
+			//System.out.println("V="+rsmeValida);
+			if (rsmeValida>rsmeValida2) {
+				System.out.println("Cont -->"+cont);
+			}
+			rsmeValida2 = mlpV.getEqm();
+*/
+		}
+		
+		//otimizador fim
 		mlp.setAllPesos(melhorIndividuo);
 		mlp.interation();
 		treino = mlp.getOutputMLP();
 		
-		MLP mlpV = new MLP(entradaVN, saidaV, qNE, tamanhoDaJanela,min, max);
 		mlpV.setAllPesos(melhorIndividuo);
 		mlpV.interation();
 		validacao = mlpV.getOutputMLP();
@@ -203,11 +231,15 @@ public class Organizando {
 		teste = mlpT.getOutputMLP();
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase);
+		//g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase);
 		
 		mlp.setAllPesos(melhorIndividuo);
-		mlp.train(0.01,1000);
-		double allPesos[] = mlp.getALLPesos();
+		double allPesos[];
+		mlp.train(0.01,1);
+		allPesos = mlp.getALLPesos();
+		mlpV.setAllPesos(allPesos);
+		
+		allPesos = mlp.getALLPesos();
 		treino = mlp.getOutputMLP();
 		
 		mlpV.setAllPesos(allPesos);
@@ -218,39 +250,112 @@ public class Organizando {
 		mlpT.interation();
 		teste = mlpT.getOutputMLP();
 		
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase);
-		DefaultCategoryDataset d = new DefaultCategoryDataset();
+		MLP mlpP = new MLP(entradaTN, real, qNE, tamanhoDaJanela,min, max);
+		mlpP.setAllPesos(pesos2);
+		prevision = mlpP.prevision(entradaTN[entradaTN.length-1], r2);
 		
-		int k;
-		for (k = 0; k < melhorIndFit.length; k++) {
-			d.addValue(melhorIndFit[k], "melhor individuo fitness", k + "");
+		
+//		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase);	
+		//g.mostrar3(melhorIndFit, "melhor individuo fitness");
+	//	g.mostrar3(rsmeVectorValida, "validação rsme");
+		
+		System.out.println("->"+rsmeValidaMenor);
+		
+		mlp.setAllPesos(pesos2);
+		mlpV.setAllPesos(pesos2);
+		mlpT.setAllPesos(pesos2);
+		mlp.interation();
+		mlpV.interation();
+		mlpT.interation();
+		treino = mlp.getOutputMLP();
+		validacao = mlpV.getOutputMLP();
+		teste = mlpT.getOutputMLP();
+		//g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "", nomeDaBase);
+		
+		double antI = ant;
+		double prevUtima = prevision[prevision.length-1];
+	
+		//for (int i = 0; i < real.length; i++) {
+		System.out.print("anterior --> " + antI + " ideal--> " + real[real.length-1] + "		output Ob-->" + prevUtima);
+		if (prevUtima > antI && real[real.length-1] > antI) {
+			System.out.println(" + -->V");
+			v++;
+		} else if (prevUtima <= antI && real[real.length-1] <= antI) {
+			System.out.println(" - -->V");
+			v++;
+		} else {
+			System.out.println(" - -->F");
+			f++;
 		}
-
-		JFreeChart grafico = ChartFactory.createLineChart("", "geracao", "fitness", d, PlotOrientation.VERTICAL, true,
-				true, true);
-		grafico.getCategoryPlot().getRenderer().setSeriesPaint(0, Color.RED);
-
-		JFrame frame = new JFrame();
-		frame.add(new ChartPanel(grafico));
-
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.pack();
-		frame.setVisible(true);
-
+			//antI = real[i];
+			//antR = prevision[i];
+		//}
+		System.out.println("v -->"+v);
+		System.out.println("f -->"+f);
+		System.out.println("__________________");
+		
+		return real[real.length-1];
 	}
 	
-	public static ArrayList<Double> leituraDeArquivo(String nome) {
+	public static void main(String[] args) {
+		int r =304;
+		double ant = 0;
+		for (int i = 0; i < 100; i++) {
+			ant = run(r,1,ant);
+			r=r+1;
+		}
+	}
+	
+	
+	
+	public static ArrayList<Double> leituraDeArquivo2(String nome,int usaveis) {
 
 		BufferedReader br = null;
 		ArrayList<Double> dados = new ArrayList<Double>();
 		try {
 
-			String path = Organizando.class.getResource(nome).getPath();
+			String path = Principal.class.getResource(nome).getPath();
 			br = new BufferedReader(new FileReader(path));
 			int aux = 0;
 			String linha = null;
+			int cont= 0;
 			while ((linha = br.readLine()) != null) {
-				dados.add(Double.parseDouble(linha));
+				if (cont>=usaveis) {
+					dados.add(Double.parseDouble(linha));
+				}
+				cont++;
+				
+			}
+
+			br.close();
+			return dados;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static ArrayList<Double> leituraDeArquivo(String nome,int usaveis) {
+
+		BufferedReader br = null;
+		ArrayList<Double> dados = new ArrayList<Double>();
+		try {
+
+			String path = Principal.class.getResource(nome).getPath();
+			br = new BufferedReader(new FileReader(path));
+			int aux = 0;
+			String linha = null;
+			int cont= 0;
+			while ((linha = br.readLine()) != null) {
+				if (cont<usaveis) {
+					dados.add(Double.parseDouble(linha));
+				}
+				cont++;
+				
 			}
 
 			br.close();
