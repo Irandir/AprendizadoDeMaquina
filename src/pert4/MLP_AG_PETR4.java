@@ -1,30 +1,27 @@
-package AG;
+package pert4;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import javax.swing.JFrame;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.category.DefaultCategoryDataset;
+import com.orsoncharts.util.json.JSONObject;
+import com.orsoncharts.util.json.parser.JSONParser;
+import com.orsoncharts.util.json.parser.ParseException;
 
 import AG.AlgoritmoGeneticoReal;
-import AG.MLP;
+import MLP.MLP;
 import grafico.Grafico;
 
-public class Principal {
+public class MLP_AG_PETR4 {
 	static Random rand = new Random();
-	static int v = 0;
-	static int f = 0;
+
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
 		int i = 0;
 		i = (int) (tamanhoDosDados * por);
@@ -77,7 +74,7 @@ public class Principal {
 		return valuesN;
 	}
 	
-	public static double  run(int r,int r2,double ant){
+	public static void run(){
 		System.out.println("Aguarde");
 		int tamanhoDaJanela = 1;
 
@@ -87,9 +84,9 @@ public class Principal {
 		// qNS é o numero de neuronios da Camada de Saida
 		int qNS = 1;
 		
-		String nomeDaBase = "jpy.txt";
-		List<Double> dados = leituraDeArquivo(nomeDaBase,r);	
-		List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
+		String nomeDaBase = "PETR4.SA.txt";
+		List<Double> dados = leituraJSON();	
+		//List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
 		
 		// tamaho Do Conjunto de Treino
@@ -100,9 +97,7 @@ public class Principal {
 
 		// tamaho Do Conjunto de validacao
 		int testeLegth = porcentagemDoDados(dadosTamanho, 0.2);
-		if(r %2 !=0){
-			testeLegth--;
-		}
+		
 		//extremos
 		double min = dados.get(0);
 		double max = dados.get(0);
@@ -140,10 +135,10 @@ public class Principal {
 			}
 			saidaT[i] = dados.get(entradaT[0].length + i + entrada.length + entradaV.length);
 		}
-		double real[] = new double[r2];
+		/*double real[] = new double[r2];
 		for (int i = 0; i < real.length; i++) {
 			real[i] = dados2.get(i);
-		}
+		}*/
 		
 		// Normaliza
 		double entradaN[][] = normalizaValues(entrada, min, max);
@@ -157,7 +152,7 @@ public class Principal {
 		double treino[] = new double[saida.length];
 		double validacao[] = new double[saidaV.length];
 		double teste[] = new double[saidaT.length];
-		double prevision[] = new double[real.length];
+		//double prevision[] = new double[real.length];
 		
 		
 		//otimizador
@@ -195,7 +190,7 @@ public class Principal {
 				individuo = populacao[contEMQ];
 				mlp.setAllPesos(individuo);
 				mlp.interation();
-				errosMediosQuadraticos[contEMQ] = mlp.getEqm();
+				errosMediosQuadraticos[contEMQ] = mlp.getEmq();
 			}
 			fitness = ag.fitness(errosMediosQuadraticos);
 			melhorIndividuo = ag.melhorIndividuo(populacao, fitness);
@@ -203,7 +198,7 @@ public class Principal {
 			
 			mlpV.setAllPesos(melhorIndividuo);
 			mlpV.interation();
-			rsmeVectorValida[cont] = mlpV.getEqm();
+			rsmeVectorValida[cont] = mlpV.getEmq();
 			if (rsmeVectorValida[cont]<rsmeValidaMenor) {
 				rsmeValidaMenor = rsmeVectorValida[cont];
 				pesos2 = melhorIndividuo;
@@ -231,11 +226,11 @@ public class Principal {
 		teste = mlpT.getOutputMLP();
 		
 		Grafico g = new Grafico();
-		//g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase);
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase);
 		
 		mlp.setAllPesos(melhorIndividuo);
 		double allPesos[];
-		mlp.train(0.01,1);
+		mlp.train(0.01,2000);
 		allPesos = mlp.getALLPesos();
 		mlpV.setAllPesos(allPesos);
 		
@@ -250,15 +245,17 @@ public class Principal {
 		mlpT.interation();
 		teste = mlpT.getOutputMLP();
 		
-		MLP mlpP = new MLP(entradaTN, real, qNE, tamanhoDaJanela,min, max);
-		mlpP.setAllPesos(pesos2);
-		prevision = mlpP.prevision(entradaTN[entradaTN.length-1], r2);
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase);
+		
+		/*MLP mlpP = new MLP(entradaTN, real, qNE, tamanhoDaJanela,min, max);
+		mlpP.setAllPesos(pesos2);*/
+		//prevision = mlpP.prevision(entradaTN[entradaTN.length-1], r2);
 		
 		
-//		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase);	
+//			
 		//g.mostrar3(melhorIndFit, "melhor individuo fitness");
 	//	g.mostrar3(rsmeVectorValida, "validação rsme");
-		
+/*		
 		System.out.println("->"+rsmeValidaMenor);
 		
 		mlp.setAllPesos(pesos2);
@@ -269,13 +266,13 @@ public class Principal {
 		mlpT.interation();
 		treino = mlp.getOutputMLP();
 		validacao = mlpV.getOutputMLP();
-		teste = mlpT.getOutputMLP();
+		teste = mlpT.getOutputMLP();*/
 		//g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "", nomeDaBase);
 		
-		double antI = ant;
-		double prevUtima = prevision[prevision.length-1];
+		//double antI = ant;
+		//double prevUtima = prevision[prevision.length-1];
 	
-		//for (int i = 0; i < real.length; i++) {
+		/*//for (int i = 0; i < real.length; i++) {
 		System.out.print("anterior --> " + antI + " ideal--> " + real[real.length-1] + "		output Ob-->" + prevUtima);
 		if (prevUtima > antI && real[real.length-1] > antI) {
 			System.out.println(" + -->V");
@@ -286,87 +283,70 @@ public class Principal {
 		} else {
 			System.out.println(" - -->F");
 			f++;
-		}
+		}*/
 			//antI = real[i];
 			//antR = prevision[i];
 		//}
-		System.out.println("v -->"+v);
-		System.out.println("f -->"+f);
-		System.out.println("__________________");
 		
-		return real[real.length-1];
+		
+		//return real[real.length-1];
 	}
 	
 	public static void main(String[] args) {
-		int r =304;
-		double ant = 0;
-		for (int i = 0; i < 100; i++) {
-			ant = run(r,1,ant);
-			r=r+1;
-		}
+		run();
+		
 	}
 	
-	
-	
-	public static ArrayList<Double> leituraDeArquivo2(String nome,int usaveis) {
 
-		BufferedReader br = null;
-		ArrayList<Double> dados = new ArrayList<Double>();
+	public static ArrayList<Double> leituraJSON() {
+		JSONObject jsonObject;
+		JSONObject jsonObject2;
+		JSONObject jsonObject3;
+		JSONParser parser = new JSONParser();
+		// TODO Auto-generated method stub
+        int a = 0;
+        ArrayList<Double> dados = new ArrayList<Double>();
 		try {
-
-			String path = Principal.class.getResource(nome).getPath();
-			br = new BufferedReader(new FileReader(path));
+            //Salva no objeto JSONObject o que o parse tratou do arquivo
+			String path = MLP_PETR4.class.getResource("petr4full.json").getPath();
+			jsonObject = (JSONObject) parser.parse(new FileReader(path));
+			jsonObject2 = (JSONObject)jsonObject.get("Time Series (Daily)");
+			Calendar calendar = Calendar.getInstance();
 			int aux = 0;
-			String linha = null;
-			int cont= 0;
-			while ((linha = br.readLine()) != null) {
-				if (cont>=usaveis) {
-					dados.add(Double.parseDouble(linha));
+			String data;
+			int fechar = 0;
+			Double value;
+			do{
+				calendar.set(2010, 01, 01+aux);
+				Date date = calendar.getTime();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				data = sdf.format(date);
+				jsonObject3 = (JSONObject)jsonObject2.get(data);
+				if(jsonObject3!=null){
+					value = Double.parseDouble(jsonObject3.get("4. close").toString());
+					if(value!=0){
+						dados.add(value);
+						a++;
+						System.out.println(a);
+					}
+					fechar = 0;
 				}
-				cont++;
+				fechar++;
+				aux++;
 				
-			}
-
-			br.close();
+			}while(fechar<=10);
 			return dados;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return null;
-	}
-	
-	public static ArrayList<Double> leituraDeArquivo(String nome,int usaveis) {
-
-		BufferedReader br = null;
-		ArrayList<Double> dados = new ArrayList<Double>();
-		try {
-
-			String path = Principal.class.getResource(nome).getPath();
-			br = new BufferedReader(new FileReader(path));
-			int aux = 0;
-			String linha = null;
-			int cont= 0;
-			while ((linha = br.readLine()) != null) {
-				if (cont<usaveis) {
-					dados.add(Double.parseDouble(linha));
-				}
-				cont++;
-				
-			}
-
-			br.close();
-			return dados;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+        } 
+        //Trata as exceptions que podem ser lançadas no decorrer do processo
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } catch (ParseException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
+    
 		return null;
 	}
 }

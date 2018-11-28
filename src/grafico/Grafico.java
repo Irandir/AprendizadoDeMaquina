@@ -1,12 +1,9 @@
 package grafico;
 
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;

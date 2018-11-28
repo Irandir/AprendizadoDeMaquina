@@ -1,4 +1,4 @@
-package AG;
+package MLP;
 
 public class MLP {
 	private double[][] pesos;
@@ -14,11 +14,14 @@ public class MLP {
 	private double fnetsO;
 
 	// resposta
-	private double eqm;
+	private double emq;
 	private double[] outputMLP;
 	private double max = 0;
 	private double min = 0;
 
+	
+	
+	
 	public MLP(double[][] input, double[] output, int qNE, int tamanhoDaJanela, double max, double min) {
 		this.input = input;
 		this.outputD = output;
@@ -116,6 +119,7 @@ public class MLP {
 				}
 				netsO += biasE;
 				fnetsO = netsO;
+				//fnetsO = f(netsO);
 				
 				outputMLP[y] = desnormalizar(fnetsO, min, max);
 				
@@ -129,7 +133,8 @@ public class MLP {
 				outputND = normazindoDado(outputD[y], min, max);
 				erro = outputND - fnetsO;
 				
-				g0 = erro * fnetsO * (1 - fnetsO);
+				g0 = erro;
+				//g0 = erro * fnetsO * (1 - fnetsO);
 
 				// calculando o grandiete H
 				for (int i = 0; i < gH.length; i++) {
@@ -167,7 +172,7 @@ public class MLP {
 	}
 
 	public void interation() {
-		eqm = 0;
+		emq = 0;
 
 		// cada instancia (entrada)
 		for (int y = 0; y < input.length; y++) {
@@ -198,16 +203,16 @@ public class MLP {
 
 			outputMLP[y] = desnormalizar(fnetsO, min, max);
 			// EQ
-			eqm += Math.pow((outputD[y] - outputMLP[y]), 2);
+			emq += Math.pow((outputD[y] - outputMLP[y]), 2);
 
 		} // final da interacoes das instancias
 
-		eqm = eqm / outputD.length;
+		emq = emq / outputD.length;
 
 	}
 
 	public double[] prevision(double[] input,int n) {
-		eqm = 0;
+		emq = 0;
 		double[] prevision = new double[n];
 		// cada instancia (entrada)
 		for (int y = 0; y < n; y++) {
@@ -238,7 +243,7 @@ public class MLP {
 
 			prevision[y] = desnormalizar(fnetsO, min, max);
 			// EQ
-			eqm += Math.pow((outputD[y] - prevision[y]), 2);
+			emq += Math.pow((outputD[y] - prevision[y]), 2);
 			for (int i = 0; i < input.length-1; i++) {
 				input[i] = input[i+1];
 			}
@@ -246,7 +251,7 @@ public class MLP {
 
 		} // final da interacoes das instancias
 
-		eqm = eqm / outputD.length;
+		emq = emq / outputD.length;
 		return prevision;
 	}
 	
@@ -263,12 +268,12 @@ public class MLP {
 		return (dadoNormal - min) / (max - min);
 	}
 
-	public double getEqm() {
-		return eqm;
+	public double getEmq() {
+		return emq;
 	}
 
-	public void setEqm(double eqm) {
-		this.eqm = eqm;
+	public void setEmq(double eqm) {
+		this.emq = eqm;
 	}
 
 	public double[] getOutputMLP() {
@@ -279,4 +284,100 @@ public class MLP {
 		this.outputMLP = outputMLP;
 	}
 
+	public double[][] getPesos() {
+		return pesos;
+	}
+
+	public void setPesos(double[][] pesos) {
+		this.pesos = pesos;
+	}
+
+	public double[] getBias() {
+		return bias;
+	}
+
+	public void setBias(double[] bias) {
+		this.bias = bias;
+	}
+
+	public double[] getPesosE() {
+		return pesosE;
+	}
+
+	public void setPesosE(double[] pesosE) {
+		this.pesosE = pesosE;
+	}
+
+	public double getBiasE() {
+		return biasE;
+	}
+
+	public void setBiasE(double biasE) {
+		this.biasE = biasE;
+	}
+
+	public double[][] getInput() {
+		return input;
+	}
+
+	public void setInput(double[][] input) {
+		this.input = input;
+	}
+
+	public double[] getOutputD() {
+		return outputD;
+	}
+
+	public void setOutputD(double[] outputD) {
+		this.outputD = outputD;
+	}
+
+	public double[] getNets() {
+		return nets;
+	}
+
+	public void setNets(double[] nets) {
+		this.nets = nets;
+	}
+
+	public double[] getFnets() {
+		return fnets;
+	}
+
+	public void setFnets(double[] fnets) {
+		this.fnets = fnets;
+	}
+
+	public double getNetsO() {
+		return netsO;
+	}
+
+	public void setNetsO(double netsO) {
+		this.netsO = netsO;
+	}
+
+	public double getFnetsO() {
+		return fnetsO;
+	}
+
+	public void setFnetsO(double fnetsO) {
+		this.fnetsO = fnetsO;
+	}
+
+	public double getMax() {
+		return max;
+	}
+
+	public void setMax(double max) {
+		this.max = max;
+	}
+
+	public double getMin() {
+		return min;
+	}
+
+	public void setMin(double min) {
+		this.min = min;
+	}
+	
 }

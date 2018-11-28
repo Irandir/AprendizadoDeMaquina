@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="lib/orsonpdf-1.6-eval.jar"/>
 	<classpathentry kind="lib" path="lib/servlet.jar"/>
 	<classpathentry kind="lib" path="/Advances_Topics_In_Intelligent_Computing_Project2/jmathplot.jar"/>
+	<classpathentry kind="lib" path="C:/biblioteca/javax.json-api-1.0-javadoc/javax.json-api-1.0-javadoc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
