@@ -1,5 +1,6 @@
 package teste;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 import com.orsoncharts.util.json.JSONObject;
 import com.orsoncharts.util.json.parser.JSONParser;
@@ -23,7 +26,7 @@ public class TesteAdaline {
 		int tamanhoDaJanela = 1;
 
 		
-		List<Double> dados = leituraJSON();
+		List<Double> dados = leituraDeArquivo2("leite.txt");
 		
 		// List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
@@ -126,6 +129,8 @@ public class TesteAdaline {
 		double[] outputT6 = adaline6.getOutputAdaline();
 		
 		g.mostrar2(saida, saidaV, saidaT, output4, outputV5, outputT6, "Adaline Linear", "PETR4.SA");
+		
+		JOptionPane.showMessageDialog(null, ""+adaline5.getEmq()+adaline6.getEmq());
 	}
 
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
@@ -147,55 +152,32 @@ public class TesteAdaline {
 	public static double normazindoDado(double dadoNormal, double min, double max) {
 		return (dadoNormal - min) / (max - min);
 	}
-	public static ArrayList<Double> leituraJSON() {
-		JSONObject jsonObject;
-		JSONObject jsonObject2;
-		JSONObject jsonObject3;
-		JSONParser parser = new JSONParser();
-		// TODO Auto-generated method stub
-        int a = 0;
-        ArrayList<Double> dados = new ArrayList<Double>();
+	public static ArrayList<Double> leituraDeArquivo2(String nome) {
+
+		BufferedReader br = null;
+		ArrayList<Double> dados = new ArrayList<Double>();
 		try {
-            //Salva no objeto JSONObject o que o parse tratou do arquivo
-			String path = MLP_PETR4.class.getResource("petr4full.json").getPath();
-			jsonObject = (JSONObject) parser.parse(new FileReader(path));
-			jsonObject2 = (JSONObject)jsonObject.get("Time Series (Daily)");
-			Calendar calendar = Calendar.getInstance();
-			int aux = 0;
-			String data;
-			int fechar = 0;
-			Double value;
-			do{
-				calendar.set(2010, 01, 01+aux);
-				Date date = calendar.getTime();
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-				data = sdf.format(date);
-				jsonObject3 = (JSONObject)jsonObject2.get(data);
-				if(jsonObject3!=null){
-					value = Double.parseDouble(jsonObject3.get("4. close").toString());
-					if(value!=0){
-						dados.add(value);
-						a++;
-						System.out.println(a);
-					}
-					fechar = 0;
-				}
-				fechar++;
-				aux++;
+
+			String path = Principal.class.getResource(nome).getPath();
+			br = new BufferedReader(new FileReader(path));
+			String aux = "";
+			String linha = null;
+		
+			while ((linha = br.readLine()) != null) {
+				aux = linha.replaceAll(",", ".");
+				dados.add(Double.parseDouble(aux));
 				
-			}while(fechar<=10);
+			}
+
+			br.close();
 			return dados;
-        } 
-        //Trata as exceptions que podem ser lançadas no decorrer do processo
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        } catch (ParseException e2) {
-            // TODO Auto-generated catch block
-            e2.printStackTrace();
-        }
-    
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		return null;
 	}
 }

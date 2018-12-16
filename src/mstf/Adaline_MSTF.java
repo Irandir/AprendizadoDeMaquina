@@ -1,6 +1,5 @@
-package pert4;
+package mstf;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -9,50 +8,38 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.JOptionPane;
 
-import com.orsoncharts.util.json.JSONArray;
 import com.orsoncharts.util.json.JSONObject;
 import com.orsoncharts.util.json.parser.JSONParser;
 import com.orsoncharts.util.json.parser.ParseException;
 
-import MLP.MLP;
+import MLP.*;
 import grafico.Grafico;
-import teste.Principal;
-import teste.TesteJSON;
 
-public class MLP_PETR4 {
-	static Random rand = new Random();
 
-	
+public class Adaline_MSTF {
+
 	public static void main(String[] args) {
 		int tamanhoDaJanela = 1;
 
-		// qNE é o numero de neuronios da Camada de Escondida
-		int qNE = 2;
-
-		// qNS é o numero de neuronios da Camada de Saida
-		int qNS = 1;
-		
 		
 		List<Double> dados = leituraJSON();
 		
-		
-		//List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
+		// List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
-		
+
 		// tamaho Do Conjunto de Treino
 		int treinoLegth = porcentagemDoDados(dadosTamanho, 0.5);
-		
+
 		// tamaho Do Conjunto de validacao
 		int validaLegth = porcentagemDoDados(dadosTamanho, 0.3);
 
 		// tamaho Do Conjunto de validacao
 		int testeLegth = porcentagemDoDados(dadosTamanho, 0.2);
-		
-		//extremos
+
+		// extremos
 		double min = dados.get(0);
 		double max = dados.get(0);
 		for (int i = 0; i < dados.size(); i++) {
@@ -63,7 +50,7 @@ public class MLP_PETR4 {
 				max = dados.get(i);
 			}
 		}
-		
+
 		// dados
 		double entrada[][] = new double[treinoLegth][tamanhoDaJanela];
 		double saida[] = new double[treinoLegth];
@@ -89,84 +76,68 @@ public class MLP_PETR4 {
 			}
 			saidaT[i] = dados.get(entradaT[0].length + i + entrada.length + entradaV.length);
 		}
-	
-		
+
 		// Normaliza
 		double entradaN[][] = normalizaValues(entrada, min, max);
 		double entradaVN[][] = normalizaValues(entradaV, min, max);
 		double entradaTN[][] = normalizaValues(entradaT, min, max);
+
+		Adaline adaline = new Adaline(entradaN, saida, tamanhoDaJanela, max, min,true);
+		adaline.train(0.01, 1000);
+		adaline.interation();
+		double[] output = adaline.getOutputAdaline();
+		double pesos[] = adaline.getPesos();
+		double bias = adaline.getBias();
 		
-		int pesosLength = (tamanhoDaJanela * qNE + qNE) + (qNE * qNS) + qNS;
-		double[]allPesos = gerandoPesosAleatorio(pesosLength);
+		//com sigmoid
+		Adaline adaline2 = new Adaline(entradaVN, saidaV, tamanhoDaJanela, max, min,true);
+		adaline2.setBias(bias);
+		adaline2.setPesos(pesos);
+		adaline2.interation();
+		double[] outputV = adaline2.getOutputAdaline();
 		
-		MLP mlp = new MLP(entradaN, saida, qNE,tamanhoDaJanela,max, min);
-		mlp.setAllPesos(allPesos);
-		mlp.train(0.01,1000);
-		double [][] pesos = mlp.getPesos();
-		double []pesosE = mlp.getPesosE();
-		double []bias = mlp.getBias();
-		double biasE = mlp.getBiasE();
+		Adaline adaline3 = new Adaline(entradaTN, saidaT, tamanhoDaJanela, max, min,true);
+		adaline3.setBias(bias);
+		adaline3.setPesos(pesos);
+		adaline3.interation();
+		double[] outputT = adaline3.getOutputAdaline();
 		
-		double []treino = mlp.getOutputMLP();
-	
-		
-		MLP mlpV = new MLP(entradaVN, saidaV, qNE, tamanhoDaJanela,max, min);
-		mlpV.setPesos(pesos);
-		mlpV.setPesosE(pesosE);
-		mlpV.setBias(bias);
-		mlpV.setBiasE(biasE);
-		mlpV.interation();
-		double []validacao = mlpV.getOutputMLP();
-		
-		MLP mlpT = new MLP(entradaTN, saidaT, qNE, tamanhoDaJanela,max, min);
-		mlpT.setPesos(pesos);
-		mlpT.setPesosE(pesosE);
-		mlpT.setBias(bias);
-		mlpT.setBiasE(biasE);
-		mlpT.interation();
-		double []teste = mlpT.getOutputMLP();
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "MLP", "PETR4.SA");
+		g.mostrar2(saida, saidaV, saidaT, output, outputV, outputT, "Adaline Não Linear", "PETR4.SA");
 		
-		JOptionPane.showMessageDialog(null, ""+mlpV.getEmq()+" "+mlpT.getEmq());
-
+		
+		Adaline adaline4 = new Adaline(entradaN, saida, tamanhoDaJanela, max, min,false);
+		adaline4.train(0.01, 1000);
+		adaline4.interation();
+		double[] output4 = adaline4.getOutputAdaline();
+		double pesos4[] = adaline4.getPesos();
+		double bias4 = adaline4.getBias();
+		
+		//linear
+		Adaline adaline5 = new Adaline(entradaVN, saidaV, tamanhoDaJanela, max, min,false);
+		adaline5.setBias(bias4);
+		adaline5.setPesos(pesos4);
+		adaline5.interation();
+		double[] outputV5 = adaline5.getOutputAdaline();
+		
+		Adaline adaline6 = new Adaline(entradaTN, saidaT, tamanhoDaJanela, max, min,false);
+		adaline6.setBias(bias4);
+		adaline6.setPesos(pesos4);
+		adaline6.interation();
+		double[] outputT6 = adaline6.getOutputAdaline();
+		
+		g.mostrar2(saida, saidaV, saidaT, output4, outputV5, outputT6, "Adaline Linear", "PETR4.SA");
+		JOptionPane.showMessageDialog(null, ""+adaline5.getEmq()+" "+adaline6.getEmq());
 	}
+
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
 		int i = 0;
 		i = (int) (tamanhoDosDados * por);
 		return i;
 	}
 
-	// gera vaolores aleatorios entre 0 e 1
-	public static double[][] gerandoPesosAleatorio(int qN, int n) {
-		double pesos[][] = new double[qN][n];
-
-		for (int i = 0; i < pesos.length; i++) {
-			for (int j = 0; j < pesos[0].length; j++) {
-				pesos[i][j] = rand.nextDouble();
-			}
-		}
-
-		return pesos;
-	}
-
-	// gera vaolores aleatorios entre 0 e 1
-	public static double[] gerandoPesosAleatorio(int qN) {
-		double pesos[] = new double[qN];
-
-		for (int i = 0; i < pesos.length; i++) {
-			pesos[i] = rand.nextDouble();
-		}
-
-		return pesos;
-	}
-
-	public static double normazindoDado(double dadoNormal, double min, double max) {
-		return (dadoNormal - min) / (max - min);
-	}
-	
-	private static double[][]normalizaValues(double[][]values,double min,double max){
+	private static double[][] normalizaValues(double[][] values, double min, double max) {
 		double[][] valuesN = new double[values.length][values[0].length];
 		for (int i = 0; i < valuesN.length; i++) {
 			for (int j = 0; j < valuesN[0].length; j++) {
@@ -175,8 +146,10 @@ public class MLP_PETR4 {
 		}
 		return valuesN;
 	}
-	
-	
+
+	public static double normazindoDado(double dadoNormal, double min, double max) {
+		return (dadoNormal - min) / (max - min);
+	}
 	public static ArrayList<Double> leituraJSON() {
 		JSONObject jsonObject;
 		JSONObject jsonObject2;
@@ -187,7 +160,7 @@ public class MLP_PETR4 {
         ArrayList<Double> dados = new ArrayList<Double>();
 		try {
             //Salva no objeto JSONObject o que o parse tratou do arquivo
-			String path = MLP_PETR4.class.getResource("petr4full.json").getPath();
+			String path = MLP_MSTF.class.getResource("mstf.json").getPath();
 			jsonObject = (JSONObject) parser.parse(new FileReader(path));
 			jsonObject2 = (JSONObject)jsonObject.get("Time Series (Daily)");
 			Calendar calendar = Calendar.getInstance();

@@ -131,5 +131,13 @@ public class Adaline {
 	public void setBias(double bias) {
 		this.bias = bias;
 	}
+
+	public double getEmq() {
+		return emq;
+	}
+
+	public void setEmq(double emq) {
+		this.emq = emq;
+	}
 	
 }

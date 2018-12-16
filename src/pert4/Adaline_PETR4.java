@@ -9,6 +9,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import com.orsoncharts.util.json.JSONObject;
 import com.orsoncharts.util.json.parser.JSONParser;
 import com.orsoncharts.util.json.parser.ParseException;
@@ -127,6 +129,7 @@ public class Adaline_PETR4 {
 		double[] outputT6 = adaline6.getOutputAdaline();
 		
 		g.mostrar2(saida, saidaV, saidaT, output4, outputV5, outputT6, "Adaline Linear", "PETR4.SA");
+		JOptionPane.showMessageDialog(null, ""+adaline5.getEmq()+" "+adaline6.getEmq());
 	}
 
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
@@ -167,7 +170,7 @@ public class Adaline_PETR4 {
 			int fechar = 0;
 			Double value;
 			do{
-				calendar.set(2010, 01, 01+aux);
+				calendar.set(2018, 01, 01+aux);
 				Date date = calendar.getTime();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				data = sdf.format(date);

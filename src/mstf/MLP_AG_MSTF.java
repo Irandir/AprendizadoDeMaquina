@@ -1,4 +1,4 @@
-package pert4;
+package mstf;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -21,7 +21,7 @@ import AG.AlgoritmoGeneticoReal;
 import MLP.MLP;
 import grafico.Grafico;
 
-public class MLP_AG_PETR4 {
+public class MLP_AG_MSTF {
 	static Random rand = new Random();
 
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
@@ -312,7 +312,7 @@ public class MLP_AG_PETR4 {
         ArrayList<Double> dados = new ArrayList<Double>();
 		try {
             //Salva no objeto JSONObject o que o parse tratou do arquivo
-			String path = MLP_PETR4.class.getResource("petr4full.json").getPath();
+			String path = MLP_MSTF.class.getResource("petr4full.json").getPath();
 			jsonObject = (JSONObject) parser.parse(new FileReader(path));
 			jsonObject2 = (JSONObject)jsonObject.get("Time Series (Daily)");
 			Calendar calendar = Calendar.getInstance();

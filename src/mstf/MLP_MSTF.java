@@ -1,4 +1,4 @@
-package pert4;
+package mstf;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -20,25 +20,25 @@ import com.orsoncharts.util.json.parser.ParseException;
 
 import MLP.MLP;
 import grafico.Grafico;
-import teste.Principal;
-import teste.TesteJSON;
 
-public class MLP_PETR4 {
+
+public class MLP_MSTF {
 	static Random rand = new Random();
-
 	
 	public static void main(String[] args) {
+		System.out.println("sccddvvds");
+	}
+	
+	public static void main2(String[] args) {
 		int tamanhoDaJanela = 1;
 
 		// qNE é o numero de neuronios da Camada de Escondida
 		int qNE = 2;
 
 		// qNS é o numero de neuronios da Camada de Saida
-		int qNS = 1;
-		
+		int qNS = 1;	
 		
 		List<Double> dados = leituraJSON();
-		
 		
 		//List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
@@ -187,7 +187,7 @@ public class MLP_PETR4 {
         ArrayList<Double> dados = new ArrayList<Double>();
 		try {
             //Salva no objeto JSONObject o que o parse tratou do arquivo
-			String path = MLP_PETR4.class.getResource("petr4full.json").getPath();
+			String path = MLP_MSTF.class.getResource("mstf.json").getPath();
 			jsonObject = (JSONObject) parser.parse(new FileReader(path));
 			jsonObject2 = (JSONObject)jsonObject.get("Time Series (Daily)");
 			Calendar calendar = Calendar.getInstance();
