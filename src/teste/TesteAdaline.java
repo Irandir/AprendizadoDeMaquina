@@ -105,7 +105,7 @@ public class TesteAdaline {
 		
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, output, outputV, outputT, "Adaline Não Linear", "PETR4.SA");
+		//g.mostrar2(saida, saidaV, saidaT, output, outputV, outputT, "Adaline Não Linear", "PETR4.SA",mlpT.getEmq());
 		
 		
 		Adaline adaline4 = new Adaline(entradaN, saida, tamanhoDaJanela, max, min,false);
@@ -128,7 +128,7 @@ public class TesteAdaline {
 		adaline6.interation();
 		double[] outputT6 = adaline6.getOutputAdaline();
 		
-		g.mostrar2(saida, saidaV, saidaT, output4, outputV5, outputT6, "Adaline Linear", "PETR4.SA");
+		//g.mostrar2(saida, saidaV, saidaT, output4, outputV5, outputT6, "Adaline Linear", "PETR4.SA");
 		
 		JOptionPane.showMessageDialog(null, ""+adaline5.getEmq()+adaline6.getEmq());
 	}

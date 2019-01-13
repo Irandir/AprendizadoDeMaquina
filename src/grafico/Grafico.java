@@ -47,7 +47,7 @@ public class Grafico extends JFrame {
 		frame.setVisible(true);
 	}
 	
-	public static void mostrar2(double[] desejadoTreino,double[] desejadoValidacao, double[] desejadoTeste,double[] treino, double [] validacao,double[] teste,String nomeDaTecinca,String nomeDaBase) {
+	public static void mostrar2(double[] desejadoTreino,double[] desejadoValidacao, double[] desejadoTeste,double[] treino, double [] validacao,double[] teste,String nomeDaTecinca,String nomeDaBase,double emq) {
 		DefaultCategoryDataset dados = new DefaultCategoryDataset();
 		int k ,i,p;
 		for (k = 0; k < treino.length; k++) {
@@ -70,7 +70,7 @@ public class Grafico extends JFrame {
 		for (j3 = 0; j3 < desejadoTeste.length; j3++) {
 			dados.addValue(desejadoTeste[j3],"Saida Desejada ",""+(j2+j+j3));
 		}
-		JFreeChart grafico = ChartFactory.createLineChart(nomeDaTecinca, "Nº", "Saída", dados, PlotOrientation.VERTICAL,
+		JFreeChart grafico = ChartFactory.createLineChart(nomeDaTecinca, ("EMQ="+emq), "Saída", dados, PlotOrientation.VERTICAL,
 				true, true, true);
 		grafico.getCategoryPlot().getRenderer().setSeriesPaint(0, Color.RED );
 		grafico.getCategoryPlot().getRenderer().setSeriesPaint(1, Color.BLACK );

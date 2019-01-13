@@ -76,17 +76,17 @@ public class MLP_AG_PETR4 {
 		return valuesN;
 	}
 	
-	public static void run(){
+	public static double[] run(){
 		System.out.println("Aguarde");
 		int tamanhoDaJanela = 1;
 
 		// qNE é o numero de neuronios da Camada de Escondida
-		int qNE = 5;
+		int qNE = 10;
 
 		// qNS é o numero de neuronios da Camada de Saida
 		int qNS = 1;
 		
-		String nomeDaBase = "PETR4.SA.txt";
+		String nomeDaBase = "MSTF.txt";
 		List<Double> dados = leituraJSON();	
 		//List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
@@ -137,10 +137,6 @@ public class MLP_AG_PETR4 {
 			}
 			saidaT[i] = dados.get(entradaT[0].length + i + entrada.length + entradaV.length);
 		}
-		/*double real[] = new double[r2];
-		for (int i = 0; i < real.length; i++) {
-			real[i] = dados2.get(i);
-		}*/
 		
 		// Normaliza
 		double entradaN[][] = normalizaValues(entrada, min, max);
@@ -154,11 +150,9 @@ public class MLP_AG_PETR4 {
 		double treino[] = new double[saida.length];
 		double validacao[] = new double[saidaV.length];
 		double teste[] = new double[saidaT.length];
-		//double prevision[] = new double[real.length];
-		
 		
 		//otimizador
-		int numeroDeGeracao =2000;
+		int numeroDeGeracao = 100;
 		int x = (tamanhoDaJanela * qNE + qNE) + (qNE * qNS) + qNS;
 		double errosMediosQuadraticos[];
 		double melhorIndFit[] = new double[numeroDeGeracao];
@@ -170,11 +164,10 @@ public class MLP_AG_PETR4 {
 		double[][] populacaoEletismo;
 		double[] fitness = null;
 		double[] melhorIndividuo = null;
-		double[][] populacao = ag.gerandoPopulacao(10, x, -1, 1);
-		MLP mlp = new MLP(entradaN, saida, qNE,tamanhoDaJanela,min, max);
-		MLP mlpV = new MLP(entradaVN, saidaV, qNE, tamanhoDaJanela,min, max);
+		double[][] populacao = ag.gerandoPopulacao(20, x, -1, 1);
+		MLP mlp = new MLP(entradaN, saida,entradaVN, saidaV,entradaTN, saidaT,qNE,tamanhoDaJanela,max, min);
+
 		double[] rsmeVectorValida = new double[numeroDeGeracao];
-		double pesos2[] = null;
 		double rsmeValidaMenor = 9999999;
 		for (int cont = 0; cont < numeroDeGeracao; cont++) {
 
@@ -191,19 +184,17 @@ public class MLP_AG_PETR4 {
 			for (int contEMQ = 0; contEMQ < errosMediosQuadraticos.length; contEMQ++) {
 				individuo = populacao[contEMQ];
 				mlp.setAllPesos(individuo);
-				mlp.interation();
-				errosMediosQuadraticos[contEMQ] = mlp.getEmq();
+				errosMediosQuadraticos[contEMQ] = mlp.train();
 			}
 			fitness = ag.fitness(errosMediosQuadraticos);
 			melhorIndividuo = ag.melhorIndividuo(populacao, fitness);
 			melhorIndFit[cont] = ag.melhorIndividuoFit(fitness);
 			
-			mlpV.setAllPesos(melhorIndividuo);
-			mlpV.interation();
-			rsmeVectorValida[cont] = mlpV.getEmq();
+
+			rsmeVectorValida[cont] = mlp.train();
 			if (rsmeVectorValida[cont]<rsmeValidaMenor) {
 				rsmeValidaMenor = rsmeVectorValida[cont];
-				pesos2 = melhorIndividuo;
+				//pesos2 = melhorIndividuo;
 			}/*
 			//System.out.println("V="+rsmeValida);
 			if (rsmeValida>rsmeValida2) {
@@ -215,90 +206,60 @@ public class MLP_AG_PETR4 {
 		
 		//otimizador fim
 		mlp.setAllPesos(melhorIndividuo);
-		mlp.interation();
-		treino = mlp.getOutputMLP();
+		mlp.train();
+		treino = mlp.getAnswerTrain();
 		
-		mlpV.setAllPesos(melhorIndividuo);
-		mlpV.interation();
-		validacao = mlpV.getOutputMLP();
 		
-		MLP mlpT = new MLP(entradaTN, saidaT, qNE, tamanhoDaJanela,min, max);
-		mlpT.setAllPesos(melhorIndividuo);
-		mlpT.interation();
-		teste = mlpT.getOutputMLP();
+		mlp.validation();
+		validacao = mlp.getAnswerValidation();
+		
+		double erroTest[] = new double[2];
+		erroTest[0]= mlp.test();
+		teste = mlp.getAnswerTest();
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase);
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase,erroTest[0]);
 		
-		JOptionPane.showMessageDialog(null, ""+mlpV.getEmq()+" "+mlpT.getEmq());
+		MLP mlp2 = new MLP(entradaN, saida,entradaVN, saidaV,entradaTN, saidaT,qNE,tamanhoDaJanela,max, min);
 		
-		mlp.setAllPesos(melhorIndividuo);
-		double allPesos[];
-		mlp.train(0.01,2000);
-		allPesos = mlp.getALLPesos();
-		mlpV.setAllPesos(allPesos);
+		mlp2.setAllPesos(melhorIndividuo);
 		
-		allPesos = mlp.getALLPesos();
-		treino = mlp.getOutputMLP();
+		mlp2.train(0.01,100);
 		
-		mlpV.setAllPesos(allPesos);
-		mlpV.interation();
-		validacao = mlpV.getOutputMLP();
+		mlp2.validation();
+		validacao = mlp2.getAnswerValidation();
 		
-		mlpT.setAllPesos(allPesos);
-		mlpT.interation();
-		teste = mlpT.getOutputMLP();
-		
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase);
-		
-		/*MLP mlpP = new MLP(entradaTN, real, qNE, tamanhoDaJanela,min, max);
-		mlpP.setAllPesos(pesos2);*/
-		//prevision = mlpP.prevision(entradaTN[entradaTN.length-1], r2);
+		erroTest[1] = mlp2.test();
+		teste = mlp2.getAnswerTest();
 		
 		
-//			
-		//g.mostrar3(melhorIndFit, "melhor individuo fitness");
-	//	g.mostrar3(rsmeVectorValida, "validação rsme");
-/*		
-		System.out.println("->"+rsmeValidaMenor);
-		
-		mlp.setAllPesos(pesos2);
-		mlpV.setAllPesos(pesos2);
-		mlpT.setAllPesos(pesos2);
-		mlp.interation();
-		mlpV.interation();
-		mlpT.interation();
-		treino = mlp.getOutputMLP();
-		validacao = mlpV.getOutputMLP();
-		teste = mlpT.getOutputMLP();*/
-		//g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "", nomeDaBase);
-		
-		//double antI = ant;
-		//double prevUtima = prevision[prevision.length-1];
-	
-		/*//for (int i = 0; i < real.length; i++) {
-		System.out.print("anterior --> " + antI + " ideal--> " + real[real.length-1] + "		output Ob-->" + prevUtima);
-		if (prevUtima > antI && real[real.length-1] > antI) {
-			System.out.println(" + -->V");
-			v++;
-		} else if (prevUtima <= antI && real[real.length-1] <= antI) {
-			System.out.println(" - -->V");
-			v++;
-		} else {
-			System.out.println(" - -->F");
-			f++;
-		}*/
-			//antI = real[i];
-			//antR = prevision[i];
-		//}
-		
-		
-		//return real[real.length-1];
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase,erroTest[1]);
+		return erroTest;
+
 	}
 	
 	public static void main(String[] args) {
-		run();
-		
+		double [][]emq30 = new double[30][2]; 
+		double aux[];
+		for (int i = 0; i < emq30.length; i++) {
+			aux = run();
+			for (int j = 0; j < emq30[0].length; j++) {
+				emq30[i][j] = aux[j];
+			}
+		}
+		double media[] = new double[2];
+		for (int i = 0; i < emq30.length; i++) {
+			for (int j = 0; j < emq30[0].length; j++) {
+				System.out.print(emq30[i][j]+"   ");
+				media[j] +=emq30[i][j]; 
+			}
+			System.out.println();
+		}
+		System.out.println("___________Media_________");
+		for (int i = 0; i < media.length; i++) {
+			media[i] = media[i]/emq30.length;
+			System.out.print(media[i]+"  ");
+		}	
 	}
 	
 
@@ -312,7 +273,7 @@ public class MLP_AG_PETR4 {
         ArrayList<Double> dados = new ArrayList<Double>();
 		try {
             //Salva no objeto JSONObject o que o parse tratou do arquivo
-			String path = MLP_PETR4.class.getResource("petr4full.json").getPath();
+			String path = MLP_AG_PETR4.class.getResource("petr4full.json").getPath();
 			jsonObject = (JSONObject) parser.parse(new FileReader(path));
 			jsonObject2 = (JSONObject)jsonObject.get("Time Series (Daily)");
 			Calendar calendar = Calendar.getInstance();
@@ -331,7 +292,7 @@ public class MLP_AG_PETR4 {
 					if(value!=0){
 						dados.add(value);
 						a++;
-						System.out.println(a);
+						//System.out.println(a);
 					}
 					fechar = 0;
 				}

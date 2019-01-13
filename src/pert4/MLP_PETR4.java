@@ -1,6 +1,5 @@
 package pert4;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,36 +10,38 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import javax.swing.JOptionPane;
-
-import com.orsoncharts.util.json.JSONArray;
 import com.orsoncharts.util.json.JSONObject;
 import com.orsoncharts.util.json.parser.JSONParser;
 import com.orsoncharts.util.json.parser.ParseException;
 
 import MLP.MLP;
 import grafico.Grafico;
-import teste.Principal;
-import teste.TesteJSON;
+
 
 public class MLP_PETR4 {
 	static Random rand = new Random();
-
 	
 	public static void main(String[] args) {
+		double aux = 0;
+		double emqTotal = 0;
+		for (int i = 0; i < 30; i++) {
+			aux = run();
+			System.out.println(aux);
+			emqTotal+=aux;
+		}
+		emqTotal/=30;
+		System.out.println("==>"+emqTotal);
+	}
+	
+	public static double run() {
 		int tamanhoDaJanela = 1;
 
-		// qNE é o numero de neuronios da Camada de Escondida
-		int qNE = 2;
+		int qNE = 10;
 
-		// qNS é o numero de neuronios da Camada de Saida
 		int qNS = 1;
-		
 		
 		List<Double> dados = leituraJSON();
 		
-		
-		//List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
 		
 		// tamaho Do Conjunto de Treino
@@ -99,39 +100,22 @@ public class MLP_PETR4 {
 		int pesosLength = (tamanhoDaJanela * qNE + qNE) + (qNE * qNS) + qNS;
 		double[]allPesos = gerandoPesosAleatorio(pesosLength);
 		
-		MLP mlp = new MLP(entradaN, saida, qNE,tamanhoDaJanela,max, min);
+		MLP mlp = new MLP(entradaN, saida,entradaVN, saidaV,entradaTN, saidaT,qNE,tamanhoDaJanela,max, min);
 		mlp.setAllPesos(allPesos);
-		mlp.train(0.01,1000);
-		double [][] pesos = mlp.getPesos();
-		double []pesosE = mlp.getPesosE();
-		double []bias = mlp.getBias();
-		double biasE = mlp.getBiasE();
+		mlp.train(0.01,300);
+		double emq = mlp.test();
 		
-		double []treino = mlp.getOutputMLP();
-	
-		
-		MLP mlpV = new MLP(entradaVN, saidaV, qNE, tamanhoDaJanela,max, min);
-		mlpV.setPesos(pesos);
-		mlpV.setPesosE(pesosE);
-		mlpV.setBias(bias);
-		mlpV.setBiasE(biasE);
-		mlpV.interation();
-		double []validacao = mlpV.getOutputMLP();
-		
-		MLP mlpT = new MLP(entradaTN, saidaT, qNE, tamanhoDaJanela,max, min);
-		mlpT.setPesos(pesos);
-		mlpT.setPesosE(pesosE);
-		mlpT.setBias(bias);
-		mlpT.setBiasE(biasE);
-		mlpT.interation();
-		double []teste = mlpT.getOutputMLP();
+		double []treino = mlp.getAnswerTrain();
+		double []validacao = mlp.getAnswerValidation();
+		double []teste = mlp.getAnswerTest();
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "MLP", "PETR4.SA");
-		
-		JOptionPane.showMessageDialog(null, ""+mlpV.getEmq()+" "+mlpT.getEmq());
-
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "MLP", "MSTF",emq);
+		//
+		//JOptionPane.showMessageDialog(null, ""+mlpV.getEmq()+" "+mlpT.getEmq());
+		return emq;
 	}
+	
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
 		int i = 0;
 		i = (int) (tamanhoDosDados * por);
@@ -206,7 +190,7 @@ public class MLP_PETR4 {
 					if(value!=0){
 						dados.add(value);
 						a++;
-						System.out.println(a);
+						//System.out.println(a);
 					}
 					fechar = 0;
 				}

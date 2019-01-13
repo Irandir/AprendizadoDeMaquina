@@ -77,7 +77,7 @@ public class Principal {
 		// qNS é o numero de neuronios da Camada de Saida
 		int qNS = 1;
 		
-		String nomeDaBase = "IBM1.txt";
+		String nomeDaBase = "leite.txt";
 		List<Double> dados = leituraDeArquivo2(nomeDaBase);	
 		//List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
@@ -219,7 +219,7 @@ public class Principal {
 		teste = mlpT.getOutputMLP();
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase);
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase,mlpT.getEmq());
 		
 		mlp.setAllPesos(melhorIndividuo);
 		double allPesos[];
@@ -238,7 +238,7 @@ public class Principal {
 		mlpT.interation();
 		teste = mlpT.getOutputMLP();
 		
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase);
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase,mlpT.getEmq());
 		
 		/*MLP mlpP = new MLP(entradaTN, real, qNE, tamanhoDaJanela,min, max);
 		mlpP.setAllPesos(pesos2);*/

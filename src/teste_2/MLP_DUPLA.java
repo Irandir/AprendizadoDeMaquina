@@ -1,8 +1,8 @@
-package MLP;
+package teste_2;
 
-import javax.swing.InputVerifier;
+import java.util.Random;
 
-public class MLP {
+public class MLP_DUPLA {
 	private double[][] pesos;
 	private double[] bias;
 	private double[] pesosE;
@@ -26,9 +26,9 @@ public class MLP {
 	private double[] answerTrain;
 	private double[] answerValidation;
 	private double[] answerTest;
-
+	Random rand = new Random();
 	
-	public MLP(double[][] inputTrain, double[] outputTrain,double[][] inputValidation ,double[] outputValidation,double[][] inputTest ,double[] outputTest ,int qNE, int tamanhoDaJanela, double max, double min) {
+	public MLP_DUPLA(double[][] inputTrain, double[] outputTrain,double[][] inputValidation ,double[] outputValidation,double[][] inputTest ,double[] outputTest ,int qNE, int tamanhoDaJanela, double max, double min) {
 		this.inputTrain = inputTrain;
 		this.outputTrain = outputTrain;
 		this.inputValidation = inputValidation;
@@ -46,9 +46,26 @@ public class MLP {
 		answerTrain = new double[outputTrain.length];
 		this.max = max;
 		this.min = min;
+		gerandoPesosAleatorio();
+	
 	}
-
-	/*public double[] getALLPesos() {
+	public void gerandoPesosAleatorio() {
+		for (int i = 0; i < pesos.length; i++) {
+			for (int j = 0; j < pesos[0].length; j++) {
+				pesos[i][j] = 0;
+			}
+		}
+		for (int i = 0; i < bias.length; i++) {
+			bias[i] = 0;
+		}
+		for (int j = 0; j < pesosE.length; j++) {
+			pesosE[j] = 0;
+		}
+		
+		biasE = 0;
+		
+	}
+	public double[] getALLPesos() {
 		
 		int x = (pesos[0].length * pesos.length + pesos.length) + (pesos.length * 1) + 1;
 		double[] all = new double[x];
@@ -71,7 +88,7 @@ public class MLP {
 		all[contX] = biasE;
 		contX++;
 		return all;
-	}*/
+	}
 	
 	public void setAllPesos(double[] values) {
 		int contX = 0;
@@ -131,23 +148,25 @@ public class MLP {
 					netsO += fnets[j] * pesosE[j];
 				}
 				netsO += biasE;
-				fnetsO = netsO;
-				//fnetsO = f(netsO);
+				//fnetsO = netsO;
+				fnetsO = f(netsO);
 				
-				answerTrain[y] = desnormalizar(fnetsO, min, max);
+				//answerTrain[y] = desnormalizar(fnetsO, min, max);
+				answerTrain[y] = fnetsO;
 				
 				// Gradiente 0(Gradiente Saida)
 				g0 = 0;
-
+				
 				// Gradiente H(Gradiente Layer escondida)
 				gH = new double[nets.length];
 
 				// calculando os erros
-				outputND = normazindoDado(outputTrain[y], min, max);
+				//outputND = normazindoDado(outputTrain[y], min, max);
+				outputND  = outputTrain[y];
 				erro = outputND - fnetsO;
 				
-				g0 = erro;
-				//g0 = erro * fnetsO * (1 - fnetsO);
+				//g0 = erro;
+				g0 = erro * fnetsO * (1 - fnetsO);
 				
 				// calculando o grandiete H
 				for (int i = 0; i < gH.length; i++) {
@@ -180,8 +199,8 @@ public class MLP {
 					bias[i] = bias[i] + n * gH[i] * 1;
 				}
 			}
-			emqValidationNext = validation();
-			//System.out.println(m+"  "+emqValidationNext);
+			/*emqValidationNext = validation();
+			System.out.println(m+"  "+emqValidationNext);
 			if (emqValidationNext > emqValidationAnt) {
 				cont++;
 			}else{
@@ -190,7 +209,7 @@ public class MLP {
 			if (cont>=5) {
 				break loop;
 			}
-			emqValidationAnt = emqValidationNext;
+			emqValidationAnt = emqValidationNext;*/
 		}
 		
 	}

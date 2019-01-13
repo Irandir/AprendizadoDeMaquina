@@ -1,4 +1,4 @@
-package mstf;
+package apple;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -21,7 +21,7 @@ import AG.AlgoritmoGeneticoReal;
 import MLP.MLP;
 import grafico.Grafico;
 
-public class MLP_AG_MSTF {
+public class MLP_AG_APPLE {
 	static Random rand = new Random();
 
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
@@ -77,7 +77,7 @@ public class MLP_AG_MSTF {
 	}
 	
 	public static double[] run(){
-		System.out.println("Aguarde");
+		//System.out.println("Aguarde");
 		int tamanhoDaJanela = 1;
 
 		// qNE é o numero de neuronios da Camada de Escondida
@@ -86,7 +86,7 @@ public class MLP_AG_MSTF {
 		// qNS é o numero de neuronios da Camada de Saida
 		int qNS = 1;
 		
-		String nomeDaBase = "MSTF.txt";
+		String nomeDaBase = "APPLE.txt";
 		List<Double> dados = leituraJSON();	
 		//List<Double> dados2 = leituraDeArquivo2(nomeDaBase,r);
 		int dadosTamanho = dados.size() - tamanhoDaJanela;
@@ -213,12 +213,12 @@ public class MLP_AG_MSTF {
 		mlp.validation();
 		validacao = mlp.getAnswerValidation();
 		
-		double erroTest[] = new double[2];
-		erroTest[0]= mlp.test();
+		double[] erroTest = new double[2];
+		erroTest[0] = mlp.test();
 		teste = mlp.getAnswerTest();
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase,erroTest[0]);
+		//g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP", nomeDaBase,erroTest[0]);
 		
 		MLP mlp2 = new MLP(entradaN, saida,entradaVN, saidaV,entradaTN, saidaT,qNE,tamanhoDaJanela,max, min);
 		
@@ -233,9 +233,10 @@ public class MLP_AG_MSTF {
 		teste = mlp2.getAnswerTest();
 		
 		
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase,erroTest[1]);
+		//g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "AG+MLP+Gradiente", nomeDaBase,erroTest[1]);
 		
 		return erroTest;
+
 	}
 	
 	public static void main(String[] args) {
@@ -260,7 +261,6 @@ public class MLP_AG_MSTF {
 			media[i] = media[i]/emq30.length;
 			System.out.print(media[i]+"  ");
 		}	
-		
 	}
 	
 
@@ -274,7 +274,7 @@ public class MLP_AG_MSTF {
         ArrayList<Double> dados = new ArrayList<Double>();
 		try {
             //Salva no objeto JSONObject o que o parse tratou do arquivo
-			String path = MLP_MSTF.class.getResource("mstf.json").getPath();
+			String path = MLP_AG_APPLE.class.getResource("Apple.json").getPath();
 			jsonObject = (JSONObject) parser.parse(new FileReader(path));
 			jsonObject2 = (JSONObject)jsonObject.get("Time Series (Daily)");
 			Calendar calendar = Calendar.getInstance();

@@ -110,7 +110,7 @@ public class TesteMLP_BTC {
 		double []teste = mlpT.getOutputMLP();
 		
 		Grafico g = new Grafico();
-		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "MLP", nomeDaBase);
+		g.mostrar2(saida, saidaV, saidaT, treino, validacao, teste, "MLP", nomeDaBase,mlpT.getEmq());
 
 	}
 	public static int porcentagemDoDados(int tamanhoDosDados, double por) {
